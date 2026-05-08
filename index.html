@@ -1,10 +1,833 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-    <title>Index Page</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Genkai Academy — JLPT N5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- ═══════════════════════════════════════════════════════
+     BACKGROUND MUSIC — Replace src with your own audio file
+     ═══════════════════════════════════════════════════════ -->
+<audio id="bgMusic" loop autoplay>
+  <!-- <source src="your-music.mp3" type="audio/mpeg" /> -->
+</audio>
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(145deg, #dbeeff 0%, #eef7ff 40%, #f8fcff 70%, #ffffff 100%);
+  color: #1a2a3a;
+  -webkit-font-smoothing: antialiased;
+}
+.font-jp { font-family: 'Noto Sans JP', sans-serif; }
+
+/* ═══════════════════════════════════════════════════════
+   PAGES — visibility control
+   ═══════════════════════════════════════════════════════ */
+.page { display: none; min-height: 100vh; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ═══════════════════════════════════════════════════════
+   GLASSMORPHISM CARD
+   ═══════════════════════════════════════════════════════ */
+.glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 8px 40px rgba(41,171,226,0.10), 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 24px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════ */
+.btn-primary {
+  display: block; width: 100%;
+  background: linear-gradient(135deg, #29ABE2 0%, #4DC8F5 100%);
+  color: #fff; border: none; border-radius: 14px;
+  padding: 18px 28px; font-size: 1rem; font-weight: 600;
+  cursor: pointer; letter-spacing: 0.02em;
+  box-shadow: 0 4px 20px rgba(41,171,226,0.30);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(41,171,226,0.40); }
+.btn-primary:active { transform: translateY(0); opacity: 0.9; }
+
+.btn-outline {
+  background: transparent; color: #29ABE2;
+  border: 2px solid #29ABE2; border-radius: 14px;
+  padding: 14px 24px; font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-outline:hover { background: rgba(41,171,226,0.08); }
+
+/* ═══════════════════════════════════════════════════════
+   INPUT
+   ═══════════════════════════════════════════════════════ */
+.input-field {
+  width: 100%; padding: 18px 20px; font-size: 1.1rem; text-align: center;
+  border: 1.5px solid rgba(41,171,226,0.25); border-radius: 14px;
+  background: rgba(255,255,255,0.9); color: #1a2a3a;
+  outline: none; transition: border 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+.input-field:focus {
+  border-color: #29ABE2;
+  box-shadow: 0 0 0 4px rgba(41,171,226,0.12);
+}
+.input-field::placeholder { color: #9ab4c8; }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-10px); }
+  40%     { transform: translateX(10px); }
+  60%     { transform: translateX(-8px); }
+  80%     { transform: translateX(8px); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-timer {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.55; }
+}
+.anim-in { animation: fadeSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.shake   { animation: shake 0.42s ease; }
+
+/* ═══════════════════════════════════════════════════════
+   MUSIC BUTTON (fixed)
+   ═══════════════════════════════════════════════════════ */
+#musicBtn {
+  position: fixed; bottom: 20px; right: 20px; z-index: 999;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,0.75); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 2px 12px rgba(41,171,226,0.18);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+#musicBtn:hover { transform: scale(1.08); }
+#musicBtn svg { width: 20px; height: 20px; }
+
+/* ═══════════════════════════════════════════════════════
+   ── PAGE 1: LOGIN
+   ═══════════════════════════════════════════════════════ */
+#loginPage {
+  align-items: center; justify-content: center; padding: 24px;
+}
+.login-card {
+  width: 100%; max-width: 440px;
+  padding: 48px 40px;
+  text-align: center;
+}
+.login-title {
+  font-size: 2rem; font-weight: 700; letter-spacing: 0.06em;
+  color: #1a2a3a; margin-bottom: 6px;
+}
+.login-jp { font-size: 0.85rem; letter-spacing: 0.2em; color: #64899e; margin-bottom: 4px; }
+.login-sub { font-size: 0.82rem; color: #8ba5b8; margin-bottom: 36px; }
+.login-heading { font-size: 1rem; font-weight: 500; color: #2c4a5e; margin-bottom: 16px; }
+.error-msg {
+  color: #e05555; font-size: 0.85rem; font-weight: 500;
+  margin-top: 10px; min-height: 20px; transition: opacity 0.2s;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ── PAGE 2: DASHBOARD
+   ═══════════════════════════════════════════════════════ */
+#dashboardPage {
+  align-items: center; justify-content: center; padding: 24px 16px;
+}
+.dashboard-wrap { width: 100%; max-width: 720px; }
+.dash-title { text-align: center; margin-bottom: 28px; }
+.dash-title h1 { font-size: 1.7rem; font-weight: 700; color: #1a2a3a; }
+.dash-title p  { font-size: 0.8rem; color: #64899e; letter-spacing: 0.15em; margin-top: 4px; }
+.dash-card { padding: 36px; }
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media(max-width:580px){ .dash-grid { grid-template-columns: 1fr; } }
+.section-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #8ba5b8; margin-bottom: 18px;
+}
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 14px; margin-bottom: 14px;
+  border-bottom: 1px solid rgba(41,171,226,0.12);
+}
+.info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.info-label { color: #7a9ab0; font-size: 0.88rem; }
+.info-value { font-weight: 600; color: #1a2a3a; font-size: 0.9rem; }
+.info-value.accent { color: #29ABE2; }
+.rules-list { list-style: none; counter-reset: rules; }
+.rules-list li {
+  counter-increment: rules; padding: 8px 0 8px 28px; position: relative;
+  font-size: 0.87rem; color: #3a5a70; line-height: 1.5;
+  border-bottom: 1px solid rgba(41,171,226,0.08);
+}
+.rules-list li:last-child { border-bottom: none; }
+.rules-list li::before {
+  content: counter(rules);
+  position: absolute; left: 0; top: 8px;
+  width: 18px; height: 18px; background: #29ABE2;
+  color: #fff; border-radius: 50%;
+  font-size: 0.7rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.dash-footer {
+  padding-top: 28px; margin-top: 28px;
+  border-top: 1px solid rgba(41,171,226,0.12);
+  display: flex; justify-content: center;
+}
+.dash-footer .btn-primary { max-width: 280px; font-size: 1.05rem; }
+
+/* ═══════════════════════════════════════════════════════
+   ── PAGE 3: EXAM
+   ═══════════════════════════════════════════════════════ */
+#examPage { flex-direction: column; }
+
+/* Sticky header */
+.exam-header {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(41,171,226,0.15);
+  padding: 14px 24px;
+  box-shadow: 0 2px 16px rgba(41,171,226,0.07);
+}
+.exam-header-inner {
+  max-width: 820px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.exam-brand { line-height: 1.2; }
+.exam-brand strong { font-size: 0.9rem; font-weight: 700; color: #1a2a3a; }
+.exam-brand span { display: block; font-size: 0.72rem; color: #64899e; letter-spacing: 0.12em; }
+.exam-meta { display: flex; align-items: center; gap: 20px; }
+.progress-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.progress-label { font-size: 0.72rem; color: #7a9ab0; font-weight: 500; }
+.progress-bar-bg {
+  width: 120px; height: 6px; background: rgba(41,171,226,0.12);
+  border-radius: 99px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #29ABE2, #4DC8F5);
+  border-radius: 99px; transition: width 0.4s ease;
+  width: 0%;
+}
+.timer-display {
+  font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 8px 16px; border-radius: 10px;
+  background: rgba(41,171,226,0.1); color: #29ABE2;
+  transition: background 0.4s, color 0.4s;
+  letter-spacing: 0.04em;
+}
+.timer-display.warn {
+  background: rgba(239,68,68,0.1); color: #ef4444;
+  animation: pulse-timer 1s ease-in-out infinite;
+}
+
+/* Question cards */
+.exam-body {
+  flex: 1; max-width: 820px; width: 100%;
+  margin: 0 auto; padding: 28px 16px 100px;
+}
+.question-card {
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(41,171,226,0.14);
+  border-radius: 18px; padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(41,171,226,0.06);
+  transition: box-shadow 0.2s;
+}
+.question-card:hover { box-shadow: 0 4px 20px rgba(41,171,226,0.12); }
+.q-header { display: flex; gap: 14px; }
+.q-num {
+  font-weight: 700; color: #29ABE2; font-size: 1.1rem;
+  flex-shrink: 0; padding-top: 1px;
+}
+.q-text {
+  font-size: 1rem; font-weight: 500; line-height: 1.65;
+  color: #1a2a3a; margin-bottom: 20px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option-label {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-radius: 12px;
+  border: 1.5px solid rgba(41,171,226,0.18);
+  cursor: pointer; transition: all 0.18s;
+  font-size: 0.93rem; color: #2c4a5e;
+  font-family: 'Noto Sans JP', sans-serif;
+  user-select: none;
+}
+.option-label:hover { background: rgba(41,171,226,0.06); border-color: rgba(41,171,226,0.35); }
+.option-label input[type="radio"] { display: none; }
+.option-label.selected {
+  background: rgba(41,171,226,0.09);
+  border-color: #29ABE2; color: #29ABE2; font-weight: 600;
+}
+.option-key {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(41,171,226,0.12); color: #29ABE2;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.78rem; transition: all 0.18s;
+}
+.option-label.selected .option-key { background: #29ABE2; color: #fff; }
+
+/* Submit area */
+.submit-area {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+  padding: 16px 24px;
+  background: rgba(255,255,255,0.88); backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(41,171,226,0.12);
+  display: flex; justify-content: center;
+}
+.submit-area .btn-primary { max-width: 340px; font-size: 1.05rem; }
+
+/* ═══════════════════════════════════════════════════════
+   MODALS / OVERLAYS
+   ═══════════════════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(15,40,60,0.18);
+  backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.overlay.show { display: flex; }
+
+.modal {
+  background: #fff; border-radius: 24px; padding: 40px 36px;
+  max-width: 380px; width: 100%; text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.12);
+  animation: fadeSlideUp 0.35s cubic-bezier(0.22,1,0.36,1) both;
+}
+.modal-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+}
+.modal h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: #1a2a3a; }
+.modal p  { font-size: 0.88rem; color: #64899e; line-height: 1.6; margin-bottom: 24px; }
+.modal .btn-primary { max-width: 200px; margin: 0 auto; }
+
+/* Processing overlay */
+#processingOverlay {
+  background: rgba(248,252,255,0.94);
+  backdrop-filter: blur(16px);
+}
+.processing-inner { text-align: center; }
+.spinner {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 4px solid rgba(41,171,226,0.2);
+  border-top-color: #29ABE2;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 24px;
+}
+.processing-inner h2 { font-size: 1.5rem; font-weight: 700; color: #1a2a3a; margin-bottom: 8px; }
+.processing-inner p  { font-size: 0.88rem; color: #8ba5b8; margin-bottom: 20px; }
+.processing-count { font-size: 2.8rem; font-weight: 700; color: #29ABE2; font-variant-numeric: tabular-nums; }
+.processing-note { font-size: 0.78rem; color: #a0bbc8; margin-top: 10px; }
+
+/* ═══════════════════════════════════════════════════════
+   ── PAGE 4: RESULT
+   ═══════════════════════════════════════════════════════ */
+#resultPage { align-items: center; justify-content: center; padding: 24px 16px; }
+.result-wrap { width: 100%; max-width: 540px; }
+.result-card { padding: 48px 40px; text-align: center; }
+@media(max-width:480px){ .result-card { padding: 36px 24px; } }
+
+.result-seal {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #f0f8ff, #e0f3fc);
+  border: 3px solid rgba(41,171,226,0.3);
+  margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;
+}
+.result-seal svg { width: 40px; height: 40px; }
+.result-title { font-size: 1.35rem; font-weight: 700; color: #1a2a3a; margin-bottom: 6px; }
+.result-subtitle { font-size: 0.82rem; color: #64899e; letter-spacing: 0.1em; margin-bottom: 32px; }
+.result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid rgba(41,171,226,0.1);
+  font-size: 0.9rem;
+}
+.result-row:last-of-type { border-bottom: none; }
+.result-row span:first-child { color: #7a9ab0; }
+.result-row span:last-child  { font-weight: 600; color: #1a2a3a; }
+.result-status {
+  display: inline-block; padding: 4px 14px; border-radius: 99px;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em;
+  background: rgba(239,68,68,0.1); color: #ef4444;
+}
+.result-divider {
+  height: 1px; background: rgba(41,171,226,0.12);
+  margin: 24px 0;
+}
+.result-message { font-size: 0.88rem; color: #3a5a70; line-height: 1.7; margin-bottom: 16px; }
+.result-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem; color: #8ba5b8; font-style: italic; margin-bottom: 32px;
+}
+.result-buttons { display: flex; gap: 12px; }
+.result-buttons .btn-primary { flex: 1; font-size: 0.92rem; padding: 15px; }
+.result-buttons .btn-outline  { flex: 1; font-size: 0.92rem; }
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(41,171,226,0.25); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(41,171,226,0.4); }
+</style>
 </head>
 <body>
-    <h1>Notifications</h1>
-    <p>Year: 2026</p>
-    <p>Active Period: April 1 — April 30, 2026</p>
+
+<!-- ══════════════════════════════════════════════════════════
+     MUSIC TOGGLE BUTTON
+     ══════════════════════════════════════════════════════════ -->
+<button id="musicBtn" title="音楽の切り替え" onclick="toggleMusic()">
+  <svg id="iconOn" viewBox="0 0 24 24" fill="none" stroke="#29ABE2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+  </svg>
+  <svg id="iconOff" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+  </svg>
+</button>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 1 — LOGIN
+     ══════════════════════════════════════════════════════════ -->
+<section id="loginPage" class="page active">
+  <div class="login-card glass anim-in" id="loginCard">
+    <h1 class="login-title">GENKAI ACADEMY</h1>
+    <p class="login-jp font-jp">日本語能力試験 N5</p>
+    <p class="login-sub">Japanese Language Proficiency Test Portal</p>
+
+    <p class="login-heading">Enter Examination Access Code</p>
+    <form onsubmit="handleLogin(event)">
+      <input type="number" id="codeInput" class="input-field" placeholder="Enter Code" autocomplete="off" />
+      <p class="error-msg" id="loginError" style="opacity:0">アクセスコードが正しくありません</p>
+      <br/>
+      <button type="submit" class="btn-primary">Proceed Further</button>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 2 — DASHBOARD
+     ══════════════════════════════════════════════════════════ -->
+<section id="dashboardPage" class="page">
+  <div class="dashboard-wrap anim-in">
+    <div class="dash-title">
+      <h1>GENKAI ACADEMY</h1>
+      <p class="font-jp">日本語能力試験 N5</p>
+    </div>
+
+    <div class="dash-card glass">
+      <div class="dash-grid">
+        <div>
+          <p class="section-label">Student Information</p>
+          <div class="info-row"><span class="info-label">Name</span><span class="info-value">Vansh</span></div>
+          <div class="info-row"><span class="info-label">Country</span><span class="info-value">India</span></div>
+          <div class="info-row"><span class="info-label">Registered Exam</span><span class="info-value accent">JLPT N5</span></div>
+        </div>
+        <div>
+          <p class="section-label">Examination Rules</p>
+          <ol class="rules-list">
+            <li>All questions are compulsory.</li>
+            <li>You must share your screen with instructor.</li>
+            <li>Do not leave Google Meet after submission.</li>
+            <li>Wait for your examination result.</li>
+            <li>Exam duration is 1 hour.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="dash-footer">
+        <button class="btn-primary" onclick="startExam()">Start Examination</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 3 — EXAM
+     ══════════════════════════════════════════════════════════ -->
+<section id="examPage" class="page">
+
+  <!-- Sticky header -->
+  <header class="exam-header">
+    <div class="exam-header-inner">
+      <div class="exam-brand">
+        <strong>GENKAI ACADEMY</strong>
+        <span class="font-jp">JLPT N5 — 日本語能力試験</span>
+      </div>
+      <div class="exam-meta">
+        <div class="progress-wrap" id="progressWrap">
+          <span class="progress-label" id="progressLabel">回答済: 0 / 50</span>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+        </div>
+        <div class="timer-display" id="timerDisplay">60:00</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Questions -->
+  <div class="exam-body" id="examBody"></div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <button class="btn-primary" onclick="submitExam()">試験を提出する</button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 4 — RESULT
+     ══════════════════════════════════════════════════════════ -->
+<section id="resultPage" class="page">
+  <div class="result-wrap">
+    <div class="result-card glass anim-in">
+
+      <div class="result-seal">
+        <svg viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="18" stroke="#29ABE2" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <path d="M13 20l5 5 9-10" stroke="#29ABE2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <h2 class="result-title">JLPT N5 Examination Result</h2>
+      <p class="result-subtitle font-jp">日本語能力試験 N5 — 結果</p>
+
+      <div class="result-row"><span>受験者名</span><span>Vansh</span></div>
+      <div class="result-row"><span>国籍</span><span>India</span></div>
+      <div class="result-row"><span>試験</span><span>JLPT N5</span></div>
+      <div class="result-row">
+        <span>結果</span>
+        <span class="result-status">FAILED</span>
+      </div>
+
+      <div class="result-divider"></div>
+
+      <p class="result-message">
+        As you failed the examination, you are no longer eligible to receive the JLPT N5 certificate.
+        Please study harder and try again next time.
+      </p>
+      <p class="result-jp font-jp">もっと頑張ってください。次回の試験で成功を祈っています。</p>
+
+      <div class="result-buttons">
+        <button class="btn-primary" onclick="window.print()">結果をダウンロード</button>
+        <button class="btn-outline" onclick="goHome()">ホームに戻る</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     WARNING MODAL — 15 minutes remaining
+     ══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="warnOverlay">
+  <div class="modal">
+    <div class="modal-icon" style="background:rgba(251,191,36,0.12)">⚠</div>
+    <h3>残り15分</h3>
+    <p>試験終了まで15分です。<br/>回答を確認してください。</p>
+    <button class="btn-primary" onclick="closeModal('warnOverlay')">続ける</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PROCESSING OVERLAY
+     ══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="processingOverlay">
+  <div class="processing-inner">
+    <div class="spinner"></div>
+    <h2>結果を生成中...</h2>
+    <p>しばらくお待ちください。</p>
+    <div class="processing-count" id="processingCount">60</div>
+    <p class="processing-note">このウィンドウを閉じないでください</p>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   QUESTIONS DATA — 50 questions, all Japanese, N5 level
+   ═══════════════════════════════════════════════════════ */
+const QUESTIONS = [
+  { id:1,  text:'「毎朝、学校___行きます。」に入る助詞はどれですか。', options:['で','に','を','が'], answer:1 },
+  { id:2,  text:'「バス___来ました。」に入る助詞はどれですか。', options:['に','が','で','を'], answer:2 },
+  { id:3,  text:'「りんご___たべました。」に入る助詞はどれですか。', options:['が','に','で','を'], answer:3 },
+  { id:4,  text:'「きのう、ともだち___えいがをみました。」に入る助詞はどれですか。', options:['で','に','と','が'], answer:2 },
+  { id:5,  text:'「つくえの上___ほんがあります。」に入る助詞はどれですか。', options:['を','に','で','と'], answer:1 },
+  { id:6,  text:'「火曜日」のよみかたはどれですか。', options:['げつようび','すいようび','かようび','もくようび'], answer:2 },
+  { id:7,  text:'「出口」のよみかたはどれですか。', options:['いりぐち','でぐち','でくち','しゅっこう'], answer:1 },
+  { id:8,  text:'「百円」のよみかたはどれですか。', options:['ひゃくいえ','せんえん','ひゃくえん','にひゃくえん'], answer:2 },
+  { id:9,  text:'「先生」のよみかたはどれですか。', options:['せんせい','せいせん','さきせい','せんしょう'], answer:0 },
+  { id:10, text:'「入口」のよみかたはどれですか。', options:['でぐち','いりぐち','にゅうぐち','はいりぐち'], answer:1 },
+  { id:11, text:'「たべる」のていねいけい（ます形）はどれですか。', options:['たべた','たべます','たべない','たべて'], answer:1 },
+  { id:12, text:'「いく」のかこけいはどれですか。', options:['いきます','いかない','いった','いって'], answer:2 },
+  { id:13, text:'「のんでください」に含まれる動詞はどれですか。', options:['のる','のびる','のこる','のむ'], answer:3 },
+  { id:14, text:'「かきません」はどんな意味ですか。', options:['かいた','かかない','かく','かいている'], answer:1 },
+  { id:15, text:'「みます」のふつうけいはどれですか。', options:['みた','みない','みて','みる'], answer:3 },
+  { id:16, text:'「ちかい」の反対語はどれですか。', options:['おおきい','とおい','ひくい','ながい'], answer:1 },
+  { id:17, text:'「はやい」の反対語はどれですか。', options:['あかるい','くらい','おそい','さむい'], answer:2 },
+  { id:18, text:'「あたらしい」の反対語はどれですか。', options:['きたない','むずかしい','ふるい','こわい'], answer:2 },
+  { id:19, text:'「たかい」の反対語はどれですか。', options:['ちいさい','やすい','かるい','うすい'], answer:1 },
+  { id:20, text:'「としょかん」はどんなところですか。', options:['たべものをかうところ','びょうきのひとがいくところ','ほんをかりるところ','かみをきるところ'], answer:2 },
+  { id:21, text:'「でんしゃ」とはなんですか。', options:['そらをとぶのりもの','せんろをはしるのりもの','みちをはしるくるま','うみをわたるのりもの'], answer:1 },
+  { id:22, text:'「あさごはん」とはいつのたべものですか。', options:['よる','ひる','あさ','よるのおそく'], answer:2 },
+  { id:23, text:'「もう　すこし　まってください。」の「もう」はどんな意味ですか。', options:['もとの','また','すでに','さらに'], answer:3 },
+  { id:24, text:'「___ませんか」はどんなときに使いますか。', options:['めいれいするとき','さそうとき','きんしするとき','ほうこくするとき'], answer:1 },
+  { id:25, text:'「___てください」はどんなときに使いますか。', options:['おねがいするとき','おどろくとき','きょかするとき','やくそくするとき'], answer:0 },
+  { id:26, text:'「水曜日」はなんようびですか。（週の順番）', options:['ふつかめ','みっかめ','よっかめ','いつかめ'], answer:1 },
+  { id:27, text:'カタカナの「シ」ににているひらがなはどれですか。', options:['つ','し','そ','け'], answer:1 },
+  { id:28, text:'カタカナの「ソ」ににているひらがなはどれですか。', options:['ん','し','そ','ね'], answer:2 },
+  { id:29, text:'「七時半」のよみかたはどれですか。', options:['しちじはん','ななじさん','しちじさん','AとBのどちらも正しい'], answer:0 },
+  { id:30, text:'「三千円」のよみかたはどれですか。', options:['さんびゃくえん','さんぜんえん','みちえん','さんせんえん'], answer:1 },
+  { id:31, text:'「二十日」のよみかたはどれですか。', options:['にじゅうにち','はつか','にじゅうか','はたち'], answer:1 },
+  { id:32, text:'「わたしは　まいにち　にほんご___べんきょうします。」に入る助詞はどれですか。', options:['を','に','が','で'], answer:0 },
+  { id:33, text:'「きょうしつに　がくせいが___います。」（五人）に入るかずはどれですか。', options:['ごほん','ごまい','ごにん','いつつ'], answer:2 },
+  { id:34, text:'「えんぴつが___本　あります。」（さん）に入るよみかたはどれですか。', options:['さんほん','さんぼん','さんぽん','みほん'], answer:1 },
+  { id:35, text:'「この　かばんは___ですか。」（ねだんをきく）に入ることばはどれですか。', options:['どんな','どこ','いくら','なにいろ'], answer:2 },
+  { id:36, text:'「___が　すきです。」（りんごが　すきです。）の___はどれですか。', options:['りんごに','りんごを','りんごが','りんごで'], answer:2 },
+  { id:37, text:'「お母さん___　電話してください。」に入る助詞はどれですか。', options:['を','で','が','に'], answer:3 },
+  { id:38, text:'「日本語が___話せます。」（すこし）に入るのはどれですか。', options:['たいへん','すこし','とても','ぜんぜん'], answer:1 },
+  { id:39, text:'「食べても___ですか。」（きょかをもとめる）に入ることばはどれですか。', options:['いけない','いい','だめ','むり'], answer:1 },
+  { id:40, text:'「___時間　かかりますか。」（どのくらい）に入ることばはどれですか。', options:['どんな','なんの','どのくらい','なにか'], answer:2 },
+  { id:41, text:'「兄」と「弟」のちがいはどれですか。', options:['兄はとしがうえ、弟はとしがした','兄はおんな、弟はおとこ','どちらもおなじ','兄はとしがした、弟はとしがうえ'], answer:0 },
+  { id:42, text:'「姉」と「妹」のちがいはどれですか。', options:['どちらもおとこのきょうだい','姉はとしがした、妹はとしがうえ','姉はとしがうえ、妹はとしがした','どちらもおなじ'], answer:2 },
+  { id:43, text:'「天気が　いいですね。」の「いい」はどんな意味ですか。', options:['あついです','さむいです','よいです','わるいです'], answer:2 },
+  { id:44, text:'「もう　いちど　いってください。」はどんな意味ですか。', options:['ゆっくりいってください','もういかないでください','おおきいこえでいってください','もう一回いってください'], answer:3 },
+  { id:45, text:'「あまり　すきじゃない」はどんな意味ですか。', options:['ぜんぜんすきではない','とてもすき','あまりすきではない','まあまあすき'], answer:2 },
+  { id:46, text:'「よる　十時に___」に入る　もっともただしいあいさつはどれですか。', options:['おはようございます','こんにちは','こんばんは','おやすみなさい'], answer:3 },
+  { id:47, text:'「___、行ってきます。」はどのばあいに使いますか。', options:['うちに　かえるとき','うちをでるとき','ひるごはんのとき','ねるまえ'], answer:1 },
+  { id:48, text:'「いただきます」はいつ言いますか。', options:['ねるまえ','たべるまえ','たべたあと','がっこうにいくとき'], answer:1 },
+  { id:49, text:'「ごちそうさまでした」はいつ言いますか。', options:['たべるまえ','ねるまえ','たべたあと','かいものをしたあと'], answer:2 },
+  { id:50, text:'「すみません」は　どのような　ばあいに　使いますか。（すべてのただしいものをえらんでください）', options:['あやまるとき','よぶとき（失礼します）','AとBのどちらも正しい','どちらもただしくない'], answer:2 },
+];
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+let timerInterval = null;
+let processingInterval = null;
+let timeLeft = 3600;
+let answers = {};
+let warnShown = false;
+let musicPlaying = true;
+
+/* ═══════════════════════════════════════════════════════
+   MUSIC
+   ═══════════════════════════════════════════════════════ */
+function toggleMusic() {
+  const audio = document.getElementById('bgMusic');
+  musicPlaying = !musicPlaying;
+  if (musicPlaying) {
+    audio.play().catch(()=>{});
+    document.getElementById('iconOn').style.display = '';
+    document.getElementById('iconOff').style.display = 'none';
+  } else {
+    audio.pause();
+    document.getElementById('iconOn').style.display = 'none';
+    document.getElementById('iconOff').style.display = '';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════ */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById(id);
+  page.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN
+   ═══════════════════════════════════════════════════════ */
+function handleLogin(e) {
+  e.preventDefault();
+  const code = document.getElementById('codeInput').value.trim();
+  const card = document.getElementById('loginCard');
+  const err  = document.getElementById('loginError');
+
+  if (code === '66214') {
+    err.style.opacity = '0';
+    card.style.transition = 'opacity 0.5s';
+    card.style.opacity = '0';
+    setTimeout(() => showPage('dashboardPage'), 550);
+  } else {
+    err.style.opacity = '1';
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
+    setTimeout(() => { card.classList.remove('shake'); err.style.opacity = '0'; }, 600);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXAM — render questions
+   ═══════════════════════════════════════════════════════ */
+function buildExam() {
+  const body = document.getElementById('examBody');
+  body.innerHTML = '';
+  const labels = ['A','B','C','D'];
+
+  QUESTIONS.forEach((q) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `qcard-${q.id}`;
+
+    const opts = q.options.map((opt, i) => `
+      <label class="option-label" id="opt-${q.id}-${i}" onclick="selectOption(${q.id},${i})">
+        <input type="radio" name="q${q.id}" value="${i}" />
+        <span class="option-key">${labels[i]}</span>
+        <span class="font-jp">${opt}</span>
+      </label>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">${q.id}.</span>
+        <div style="flex:1">
+          <p class="q-text">${q.text}</p>
+          <div class="options">${opts}</div>
+        </div>
+      </div>
+    `;
+    body.appendChild(card);
+  });
+}
+
+function selectOption(qId, optIdx) {
+  answers[qId] = optIdx;
+  const labels = document.querySelectorAll(`[id^="opt-${qId}-"]`);
+  labels.forEach(l => l.classList.remove('selected'));
+  document.getElementById(`opt-${qId}-${optIdx}`).classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(answers).length;
+  const pct   = (count / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width  = pct + '%';
+  document.getElementById('progressLabel').textContent = `回答済: ${count} / ${QUESTIONS.length}`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TIMER
+   ═══════════════════════════════════════════════════════ */
+function formatTime(s) {
+  const m = Math.floor(s / 60).toString().padStart(2,'0');
+  const sec = (s % 60).toString().padStart(2,'0');
+  return `${m}:${sec}`;
+}
+
+function startTimer() {
+  timeLeft = 3600;
+  warnShown = false;
+  const display = document.getElementById('timerDisplay');
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    display.textContent = formatTime(timeLeft);
+
+    if (timeLeft === 900 && !warnShown) {
+      warnShown = true;
+      display.classList.add('warn');
+      document.getElementById('warnOverlay').classList.add('show');
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      goResult(true);
+    }
+  }, 1000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   START EXAM
+   ═══════════════════════════════════════════════════════ */
+function startExam() {
+  answers = {};
+  buildExam();
+  showPage('examPage');
+  startTimer();
+}
+
+/* ═══════════════════════════════════════════════════════
+   SUBMIT
+   ═══════════════════════════════════════════════════════ */
+function submitExam() {
+  clearInterval(timerInterval);
+  document.getElementById('processingOverlay').classList.add('show');
+  let count = 60;
+  document.getElementById('processingCount').textContent = count;
+
+  processingInterval = setInterval(() => {
+    count--;
+    document.getElementById('processingCount').textContent = count;
+    if (count <= 0) {
+      clearInterval(processingInterval);
+      goResult(false);
+    }
+  }, 1000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESULT
+   ═══════════════════════════════════════════════════════ */
+function goResult(expired) {
+  document.getElementById('processingOverlay').classList.remove('show');
+  document.getElementById('warnOverlay').classList.remove('show');
+  showPage('resultPage');
+  if (expired) {
+    const msg = document.querySelector('.result-message');
+    if (msg) msg.textContent = '時間内に試験を完了できませんでした。genkai-academy@example.com までメールしてください。';
+  }
+}
+
+function goHome() {
+  clearInterval(timerInterval);
+  clearInterval(processingInterval);
+  document.getElementById('loginCard').style.opacity = '1';
+  document.getElementById('codeInput').value = '';
+  document.getElementById('processingOverlay').classList.remove('show');
+  document.getElementById('warnOverlay').classList.remove('show');
+  document.getElementById('timerDisplay').classList.remove('warn');
+  showPage('loginPage');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTOPLAY MUSIC on first interaction
+   ═══════════════════════════════════════════════════════ */
+document.addEventListener('click', function tryPlay() {
+  const audio = document.getElementById('bgMusic');
+  if (audio.src && !audio.src.endsWith('/genkai-academy.html')) {
+    audio.play().catch(()=>{});
+  }
+  document.removeEventListener('click', tryPlay);
+}, { once: true });
+</script>
 </body>
 </html>
